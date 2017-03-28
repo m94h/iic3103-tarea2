@@ -2,7 +2,7 @@ class UsuariosController < ApplicationController
 
   # Obtener coleccion de usuarios
   def index
-    @usuarios = Usuario.all
+    @usuarios = Usuario.GetAll
     output = {:usuarios => @usuarios, :total => @usuarios.size}
     render json: output
   end
@@ -10,7 +10,7 @@ class UsuariosController < ApplicationController
   # Obtener un usuario en base a la id
   def show
     # Find by id para no levantar exception si no lo encuentra
-    if @usuario = Usuario.find_by_id(params[:id])
+    if @usuario = Usuario.GetById(params[:id])
       render json: @usuario
     else
       output = {:error => "Usuario no encontrado"}
@@ -32,6 +32,8 @@ class UsuariosController < ApplicationController
       render json: output, status: 400
     else
       @usuario = Usuario.create(nombre: nombre, apellido: apellido, usuario: usuario, twitter: twitter)
+      # Llamar a GetById para no mostrar fechas
+      @usuario = Usuario.GetById(@usuario.id)
       render json: @usuario
     end
 
@@ -46,6 +48,7 @@ class UsuariosController < ApplicationController
       render json: output, status: 400
     else
 
+      # Obtener parametros
       id = params[:id]
       nombre = params[:nombre]
       apellido = params[:apellido]
@@ -53,12 +56,9 @@ class UsuariosController < ApplicationController
       twitter = params[:twitter]
 
       if @usuario = Usuario.find_by_id(id)
-        @usuario.nombre = nombre
-        @usuario.apellido = apellido
-        @usuario.usuario = usuario
-        @usuario.twitter = twitter
-
-        if @usuario.save
+        if @usuario.update(nombre: nombre, apellido: apellido, usuario: usuario, twitter: twitter)
+          # Llamar a GetById para no mostrar fechas
+          @usuario = Usuario.GetById(id)
           render json: @usuario
         else
           output = {:error => "La modificación ha fallado"}
@@ -68,8 +68,6 @@ class UsuariosController < ApplicationController
         output = {:error => "Usuario no encontrado"}
         render json: output, status: 404
       end
-
-      render json: params
     end
 
   end
