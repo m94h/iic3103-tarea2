@@ -22,16 +22,12 @@ class UsuariosController < ApplicationController
   def create
 
     id = params[:id]
-    nombre = params[:nombre]
-    apellido = params[:apellido]
-    usuario = params[:usuario]
-    twitter = params[:twitter]
 
     if id
       output = {:error => "No se puede crear usuario con id"}
       render json: output, status: 400
     else
-      if @usuario = Usuario.create(nombre: nombre, apellido: apellido, usuario: usuario, twitter: twitter)
+      if @usuario = Usuario.create(request.request_parameters)
         # Llamar a GetById para no mostrar fechas
         @usuario = Usuario.GetById(@usuario.id)
         render json: @usuario, status: 201
@@ -47,20 +43,16 @@ class UsuariosController < ApplicationController
   def update
 
     # Check si ID esta en el contenido. No podemos chequear con params[:id], pues ese está incluido en la URL
-    if JSON.parse(request.raw_post).key?("id")
+    if request.request_parameters.key?("id")
       output = {:error => "id no es modificable"}
       render json: output, status: 400
     else
 
-      # Obtener parametros
+      # Obtener ID
       id = params[:id]
-      nombre = params[:nombre]
-      apellido = params[:apellido]
-      usuario = params[:usuario]
-      twitter = params[:twitter]
 
       if @usuario = Usuario.find_by_id(id)
-        if @usuario.update(nombre: nombre, apellido: apellido, usuario: usuario, twitter: twitter)
+        if @usuario.update(request.request_parameters)
           # Llamar a GetById para no mostrar fechas
           @usuario = Usuario.GetById(id)
           render json: @usuario
