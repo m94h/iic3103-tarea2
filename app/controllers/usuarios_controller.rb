@@ -31,10 +31,14 @@ class UsuariosController < ApplicationController
       output = {:error => "No se puede crear usuario con id"}
       render json: output, status: 400
     else
-      @usuario = Usuario.create(nombre: nombre, apellido: apellido, usuario: usuario, twitter: twitter)
-      # Llamar a GetById para no mostrar fechas
-      @usuario = Usuario.GetById(@usuario.id)
-      render json: @usuario
+      if @usuario = Usuario.create(nombre: nombre, apellido: apellido, usuario: usuario, twitter: twitter)
+        # Llamar a GetById para no mostrar fechas
+        @usuario = Usuario.GetById(@usuario.id)
+        render json: @usuario, status: 201
+      else
+        output = {:error => "La creación ha fallado"}
+        render json: output, status: 500
+      end
     end
 
   end
